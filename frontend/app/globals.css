@@ -26,7 +26,7 @@ html {
 
 body {
   @apply bg-surface-950 text-surface-100 font-sans antialiased;
-  background-image: 
+  background-image:
     radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
     radial-gradient(ellipse at bottom right, rgba(217, 70, 239, 0.05) 0%, transparent 50%);
   min-height: 100vh;
@@ -36,7 +36,12 @@ body {
    TYPOGRAPHY
    ================================ */
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   @apply font-semibold tracking-tight;
 }
 
@@ -59,7 +64,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .glass-card {
   @apply glass rounded-2xl p-6 shadow-xl;
-  box-shadow: 
+  box-shadow:
     0 8px 32px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px rgba(255, 255, 255, 0.05);
 }
@@ -136,7 +141,7 @@ h1, h2, h3, h4, h5, h6 {
 
 .card:hover {
   @apply border-white/20;
-  box-shadow: 
+  box-shadow:
     0 12px 40px rgba(0, 0, 0, 0.4),
     inset 0 0 0 1px rgba(255, 255, 255, 0.1);
   transform: translateY(-2px);
@@ -193,18 +198,21 @@ h1, h2, h3, h4, h5, h6 {
    ================================ */
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .skeleton {
   @apply bg-surface-800 rounded;
-  background: linear-gradient(
-    90deg,
-    rgba(255, 255, 255, 0.03) 0%,
-    rgba(255, 255, 255, 0.08) 50%,
-    rgba(255, 255, 255, 0.03) 100%
-  );
+  background: linear-gradient(90deg,
+      rgba(255, 255, 255, 0.03) 0%,
+      rgba(255, 255, 255, 0.08) 50%,
+      rgba(255, 255, 255, 0.03) 100%);
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
@@ -218,6 +226,7 @@ h1, h2, h3, h4, h5, h6 {
     opacity: 0;
     transform: translateY(10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -279,4 +288,79 @@ h1, h2, h3, h4, h5, h6 {
 
 ::-webkit-scrollbar-thumb:hover {
   @apply bg-surface-600;
+}
+
+/* ================================
+   STAR ANIMATION (Orion Theme)
+   ================================ */
+
+.stars,
+.stars2,
+.stars3 {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+.stars {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 800 800'%3E%3Ccircle fill='%23FFF' cx='400' cy='400' r='1'/%3E%3Ccircle fill='%23FFF' cx='100' cy='150' r='0.8'/%3E%3Ccircle fill='%23FFF' cx='250' cy='80' r='0.6'/%3E%3Ccircle fill='%23FFF' cx='600' cy='200' r='1'/%3E%3Ccircle fill='%23FFF' cx='700' cy='350' r='0.7'/%3E%3Ccircle fill='%23FFF' cx='150' cy='600' r='0.9'/%3E%3Ccircle fill='%23FFF' cx='500' cy='500' r='0.5'/%3E%3Ccircle fill='%2367E8F9' cx='300' cy='300' r='1.5'/%3E%3Ccircle fill='%2367E8F9' cx='650' cy='100' r='1.2'/%3E%3C/svg%3E") repeat;
+  background-size: 800px 800px;
+  animation: animStar 100s linear infinite;
+  opacity: 0.5;
+}
+
+.stars2 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 600 600'%3E%3Ccircle fill='%23FFF' cx='300' cy='300' r='0.8'/%3E%3Ccircle fill='%23FFF' cx='50' cy='100' r='0.6'/%3E%3Ccircle fill='%23FFF' cx='450' cy='50' r='0.7'/%3E%3Ccircle fill='%23FFF' cx='100' cy='400' r='0.5'/%3E%3Ccircle fill='%23FFF' cx='550' cy='450' r='0.9'/%3E%3Ccircle fill='%2338BDF8' cx='200' cy='200' r='1'/%3E%3C/svg%3E") repeat;
+  background-size: 600px 600px;
+  animation: animStar 80s linear infinite;
+  opacity: 0.4;
+}
+
+.stars3 {
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 400 400'%3E%3Ccircle fill='%23FFF' cx='200' cy='200' r='0.6'/%3E%3Ccircle fill='%23FFF' cx='50' cy='350' r='0.4'/%3E%3Ccircle fill='%23FFF' cx='350' cy='50' r='0.5'/%3E%3Ccircle fill='%230EA5E9' cx='100' cy='100' r='0.8'/%3E%3C/svg%3E") repeat;
+  background-size: 400px 400px;
+  animation: animStar 60s linear infinite;
+  opacity: 0.3;
+}
+
+@keyframes animStar {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-800px);
+  }
+}
+
+/* Orion constellation glow effect */
+.orion-glow {
+  filter: drop-shadow(0 0 10px rgba(103, 232, 249, 0.5)) drop-shadow(0 0 20px rgba(56, 189, 248, 0.3));
+}
+
+/* Hero gradient text */
+.gradient-text {
+  @apply bg-gradient-to-r from-cyan-400 via-blue-400 to-purple-400 bg-clip-text text-transparent;
+}
+
+/* Floating animation */
+@keyframes float {
+
+  0%,
+  100% {
+    transform: translateY(0px);
+  }
+
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
 }
