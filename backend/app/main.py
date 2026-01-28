@@ -9,7 +9,7 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import settings
-from app.api import projects, generation, websocket, story_editor
+from app.api import projects, generation, websocket, story_editor, chapters, characters
 from app.db.session import init_db
 
 
@@ -54,6 +54,8 @@ app.add_middleware(
 app.include_router(projects.router, prefix="/api/projects", tags=["Projects"])
 app.include_router(generation.router, prefix="/api/generation", tags=["Generation"])
 app.include_router(story_editor.router, prefix="/api/story-editor", tags=["Story Editor"])
+app.include_router(chapters.router, prefix="/api/chapters", tags=["Chapters"])
+app.include_router(characters.router, prefix="/api/characters", tags=["Characters"])
 app.include_router(websocket.router, prefix="/ws", tags=["WebSocket"])
 
 
