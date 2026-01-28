@@ -252,7 +252,7 @@ class LorebookEntry(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     
     # Additional structured data
-    metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
+    entry_metadata: Mapped[Optional[dict]] = mapped_column(JSON, nullable=True)
     
     # When this fact becomes relevant (for timeline-aware retrieval)
     introduced_in_chapter: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
