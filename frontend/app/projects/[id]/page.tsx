@@ -3,6 +3,8 @@
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
 import StoryEditor from '@/components/StoryEditor'
+import InteractiveOutline from '@/components/InteractiveOutline'
+import CharacterManager from '@/components/CharacterManager'
 
 interface Project {
     id: number
@@ -250,67 +252,19 @@ export default function ProjectPage() {
                 )}
 
                 {activeTab === 'outline' && (
-                    <div className="space-y-4">
-                        {chapters.length === 0 ? (
-                            <div className="card text-center py-12">
-                                <p className="text-surface-400">No outline generated yet</p>
-                            </div>
-                        ) : (
-                            chapters.map(chapter => (
-                                <div key={chapter.id} className="card">
-                                    <div className="flex items-start justify-between mb-3">
-                                        <div>
-                                            <span className="text-sm text-surface-500">Chapter {chapter.order}</span>
-                                            <h4 className="font-semibold">{chapter.title}</h4>
-                                        </div>
-                                        <span className={`status-${chapter.status}`}>{chapter.status}</span>
-                                    </div>
-                                    <p className="text-surface-400 text-sm">{chapter.summary}</p>
-                                    {chapter.word_count > 0 && (
-                                        <p className="text-surface-500 text-xs mt-2">{chapter.word_count.toLocaleString()} words</p>
-                                    )}
-                                </div>
-                            ))
-                        )}
-                    </div>
+                    <InteractiveOutline
+                        projectId={projectId}
+                        chapters={chapters}
+                        onUpdate={fetchProject}
+                    />
                 )}
 
                 {activeTab === 'characters' && (
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {characters.length === 0 ? (
-                            <div className="card text-center py-12 col-span-2">
-                                <div className="w-16 h-16 rounded-full bg-surface-800 flex items-center justify-center mx-auto mb-4">
-                                    <svg className="w-8 h-8 text-surface-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
-                                    </svg>
-                                </div>
-                                <h3 className="text-lg font-semibold mb-2">No Characters Yet</h3>
-                                <p className="text-surface-400 text-sm mb-4 max-w-sm mx-auto">
-                                    Characters are automatically generated when you create an outline for your novel.
-                                </p>
-                                {project.status === 'draft' && (
-                                    <button onClick={generateOutline} disabled={generating} className="btn-primary text-sm">
-                                        {generating ? 'Generating...' : 'Generate Outline & Characters'}
-                                    </button>
-                                )}
-                            </div>
-                        ) : (
-                            characters.map(char => (
-                                <div key={char.id} className="card">
-                                    <div className="flex items-start gap-4">
-                                        <div className="w-16 h-16 rounded-full bg-gradient-to-br from-primary-500 to-accent-500 flex items-center justify-center text-2xl font-bold">
-                                            {char.name[0]}
-                                        </div>
-                                        <div className="flex-1">
-                                            <h4 className="font-semibold text-lg">{char.name}</h4>
-                                            <p className="text-primary-400 text-sm mb-2">{char.role}</p>
-                                            <p className="text-surface-400 text-sm">{char.bio}</p>
-                                        </div>
-                                    </div>
-                                </div>
-                            ))
-                        )}
-                    </div>
+                    <CharacterManager
+                        projectId={projectId}
+                        characters={characters}
+                        onUpdate={fetchProject}
+                    />
                 )}
 
                 {activeTab === 'editor' && (
@@ -323,6 +277,19 @@ export default function ProjectPage() {
 
                 {activeTab === 'manuscript' && (
                     <div className="space-y-8">
+                        <div className="flex justify-end mb-4">
+                            <button
+                                onClick={() => window.open(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${projectId}/export?format=markdown`, '_blank')}
+                                className="btn-secondary flex items-center gap-2"
+                                title="Export as Markdown"
+                                disabled={chapters.filter(c => c.status === 'completed').length === 0}
+                            >
+                                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                                </svg>
+                                Export Manuscript
+                            </button>
+                        </div>
                         {chapters.filter(c => c.status === 'completed').length === 0 ? (
                             <div className="card text-center py-12">
                                 <div className="w-16 h-16 rounded-full bg-surface-800 flex items-center justify-center mx-auto mb-4">
