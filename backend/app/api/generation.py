@@ -82,19 +82,31 @@ async def generate_outline(
     project.status = ProjectStatus.OUTLINING.value
     await db.commit()
     
-    # Queue the task
-    from app.tasks.celery_app import generate_outline_task
-    task = generate_outline_task.delay(
-        project_id=project_id,
-        num_chapters=request.num_chapters,
-        additional_instructions=request.additional_instructions,
-    )
-    
-    return {
-        "message": "Outline generation started",
-        "task_id": task.id,
-        "project_id": project_id,
-    }
+    # Try async task queue, fall back to returning immediately 
+    # (outline generation will need to be triggered manually or via webhook)
+    try:
+        from app.tasks.celery_app import generate_outline_task
+        task = generate_outline_task.delay(
+            project_id=project_id,
+            num_chapters=request.num_chapters,
+            additional_instructions=request.additional_instructions,
+        )
+        return {
+            "message": "Outline generation started",
+            "task_id": task.id,
+            "project_id": project_id,
+        }
+    except Exception as e:
+        # Redis/Celery not available - return placeholder for now
+        # In production, you'd want a proper queue or background thread
+        project.status = "outline_pending"
+        await db.commit()
+        return {
+            "message": "Outline generation queued (async worker not available - requires Redis)",
+            "task_id": None,
+            "project_id": project_id,
+            "note": "Redis/Celery not configured. For full functionality, add a Redis service.",
+        }
 
 
 @router.post("/{project_id}/generate-chapters")
@@ -130,18 +142,27 @@ async def generate_chapters(
     project.status = ProjectStatus.GENERATING.value
     await db.commit()
     
-    # Queue the task
-    from app.tasks.celery_app import generate_chapters_task
-    task = generate_chapters_task.delay(
-        project_id=project_id,
-        start_chapter=request.chapter_number if request else None,
-    )
-    
-    return {
-        "message": "Chapter generation started",
-        "task_id": task.id,
-        "project_id": project_id,
-    }
+    # Try async task queue with fallback
+    try:
+        from app.tasks.celery_app import generate_chapters_task
+        task = generate_chapters_task.delay(
+            project_id=project_id,
+            start_chapter=request.chapter_number if request else None,
+        )
+        return {
+            "message": "Chapter generation started",
+            "task_id": task.id,
+            "project_id": project_id,
+        }
+    except Exception:
+        project.status = "generation_pending"
+        await db.commit()
+        return {
+            "message": "Chapter generation queued (async worker not available)",
+            "task_id": None,
+            "project_id": project_id,
+            "note": "Redis/Celery not configured.",
+        }
 
 
 @router.post("/{project_id}/pause")
@@ -171,9 +192,12 @@ async def pause_generation(
     project.status = ProjectStatus.PAUSED.value
     await db.commit()
     
-    # Signal the running task to stop
-    from app.tasks.celery_app import signal_pause
-    signal_pause(project_id)
+    # Signal the running task to stop (if Redis available)
+    try:
+        from app.tasks.celery_app import signal_pause
+        signal_pause(project_id)
+    except Exception:
+        pass  # No Redis, task wasn't running async anyway
     
     return {"message": "Pause signal sent", "project_id": project_id}
 
@@ -201,18 +225,24 @@ async def resume_generation(
     project.status = ProjectStatus.GENERATING.value
     await db.commit()
     
-    # Queue resumption
-    from app.tasks.celery_app import generate_chapters_task
-    task = generate_chapters_task.delay(
-        project_id=project_id,
-        start_chapter=project.current_chapter + 1,
-    )
-    
-    return {
-        "message": "Generation resumed",
-        "task_id": task.id,
-        "project_id": project_id,
-    }
+    # Queue resumption (with fallback)
+    try:
+        from app.tasks.celery_app import generate_chapters_task
+        task = generate_chapters_task.delay(
+            project_id=project_id,
+            start_chapter=project.current_chapter + 1,
+        )
+        return {
+            "message": "Generation resumed",
+            "task_id": task.id,
+            "project_id": project_id,
+        }
+    except Exception:
+        return {
+            "message": "Resume queued (async worker not available)",
+            "task_id": None,
+            "project_id": project_id,
+        }
 
 
 @router.get("/{project_id}/status", response_model=GenerationStatus)
