@@ -23,8 +23,10 @@ export default function ProgressView({ projectId, onComplete }: ProgressViewProp
     const logsEndRef = useRef<HTMLDivElement>(null)
 
     useEffect(() => {
-        // Connect to WebSocket
-        const ws = new WebSocket(`ws://localhost:8000/ws/projects/${projectId}`)
+        // Connect to WebSocket - convert HTTP URL to WebSocket URL
+        const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000'
+        const wsUrl = apiUrl.replace(/^http/, 'ws')
+        const ws = new WebSocket(`${wsUrl}/ws/projects/${projectId}`)
 
         ws.onopen = () => {
             setConnected(true)
