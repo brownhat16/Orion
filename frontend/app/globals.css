@@ -364,3 +364,59 @@ h6 {
 .animate-float {
   animation: float 3s ease-in-out infinite;
 }
+
+/* ================================
+   STORY EDITOR
+   ================================ */
+
+.story-editor {
+  @apply animate-in;
+}
+
+.story-line {
+  @apply p-3 rounded-lg transition-all duration-200;
+  @apply hover:bg-surface-800/50;
+}
+
+.suggestion-card {
+  @apply p-4 rounded-xl;
+  @apply bg-surface-800/50 border border-surface-700;
+  @apply transition-all duration-200;
+}
+
+.suggestion-card:hover,
+.suggestion-active {
+  @apply bg-surface-700/50 border-primary-500/50;
+  box-shadow: 0 0 20px rgba(14, 165, 233, 0.15);
+}
+
+.suggestion-card-skeleton {
+  @apply p-4 rounded-xl bg-surface-800/30;
+}
+
+.suggestion-number {
+  @apply w-6 h-6 rounded-full bg-primary-500/20 text-primary-400;
+  @apply flex items-center justify-center text-xs font-bold;
+}
+
+.keyboard-hint {
+  @apply inline-flex items-center justify-center;
+  @apply w-5 h-5 rounded text-[10px] font-mono;
+  @apply bg-surface-800 text-surface-400 border border-surface-700;
+  @apply mx-0.5;
+}
+
+.scrollbar-thin::-webkit-scrollbar {
+  width: 4px;
+}
+
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  @apply bg-surface-700 rounded-full;
+}
+
+.line-clamp-4 {
+  display: -webkit-box;
+  -webkit-line-clamp: 4;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}

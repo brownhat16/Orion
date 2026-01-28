@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { useParams, useRouter } from 'next/navigation'
+import StoryEditor from '@/components/StoryEditor'
 
 interface Project {
     id: number
@@ -42,8 +43,9 @@ export default function ProjectPage() {
     const [chapters, setChapters] = useState<Chapter[]>([])
     const [characters, setCharacters] = useState<Character[]>([])
     const [loading, setLoading] = useState(true)
-    const [activeTab, setActiveTab] = useState<'overview' | 'outline' | 'characters' | 'manuscript'>('overview')
+    const [activeTab, setActiveTab] = useState<'overview' | 'outline' | 'characters' | 'manuscript' | 'editor'>('overview')
     const [generating, setGenerating] = useState(false)
+    const [showEditModal, setShowEditModal] = useState(false)
 
     useEffect(() => {
         fetchProject()
@@ -140,6 +142,15 @@ export default function ProjectPage() {
                         <div className="flex items-center gap-3 mb-2">
                             <h1 className="text-3xl font-bold">{project.title}</h1>
                             <span className={`status-${project.status}`}>{project.status.replace('_', ' ')}</span>
+                            <button
+                                onClick={() => setShowEditModal(true)}
+                                className="p-1 text-surface-400 hover:text-primary-400 transition-colors"
+                                title="Edit Project Details"
+                            >
+                                <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
+                                </svg>
+                            </button>
                         </div>
                         <p className="text-surface-400">{project.genre}</p>
                     </div>
@@ -187,13 +198,13 @@ export default function ProjectPage() {
             {/* Tabs */}
             <div className="border-b border-surface-800 mb-6">
                 <nav className="flex gap-1 -mb-px">
-                    {(['overview', 'outline', 'characters', 'manuscript'] as const).map(tab => (
+                    {(['overview', 'outline', 'characters', 'editor', 'manuscript'] as const).map(tab => (
                         <button
                             key={tab}
                             onClick={() => setActiveTab(tab)}
                             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${activeTab === tab
-                                    ? 'border-primary-500 text-primary-400'
-                                    : 'border-transparent text-surface-400 hover:text-surface-200'
+                                ? 'border-primary-500 text-primary-400'
+                                : 'border-transparent text-surface-400 hover:text-surface-200'
                                 }`}
                         >
                             {tab.charAt(0).toUpperCase() + tab.slice(1)}
@@ -289,6 +300,14 @@ export default function ProjectPage() {
                     </div>
                 )}
 
+                {activeTab === 'editor' && (
+                    <StoryEditor
+                        projectId={projectId}
+                        chapters={chapters}
+                        onChapterCreated={fetchProject}
+                    />
+                )}
+
                 {activeTab === 'manuscript' && (
                     <div className="space-y-8">
                         {chapters.filter(c => c.status === 'completed').length === 0 ? (
@@ -314,6 +333,106 @@ export default function ProjectPage() {
                         )}
                     </div>
                 )}
+                {/* Edit Project Modal */}
+                {showEditModal && project && (
+                    <EditProjectModal
+                        project={project}
+                        onClose={() => setShowEditModal(false)}
+                        onUpdated={(updatedProject) => {
+                            setProject(updatedProject)
+                            setShowEditModal(false)
+                        }}
+                    />
+                )}
+            </div>
+        </div>
+    )
+}
+
+function EditProjectModal({ project, onClose, onUpdated }: { project: Project; onClose: () => void; onUpdated: (p: Project) => void }) {
+    const [title, setTitle] = useState(project.title)
+    const [genre, setGenre] = useState(project.genre)
+    const [premise, setPremise] = useState(project.premise)
+    const [saving, setSaving] = useState(false)
+
+    async function handleUpdate(e: React.FormEvent) {
+        e.preventDefault()
+        setSaving(true)
+
+        try {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/${project.id}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ title, genre, premise }),
+            })
+
+            if (res.ok) {
+                const updated = await res.json()
+                onUpdated(updated)
+            }
+        } catch (error) {
+            console.error('Failed to update project:', error)
+        } finally {
+            setSaving(false)
+        }
+    }
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+            <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose}></div>
+
+            <div className="relative glass-card w-full max-w-xl animate-in">
+                <div className="flex items-center justify-between mb-6">
+                    <h2 className="text-2xl font-bold">Edit Project Details</h2>
+                    <button onClick={onClose} className="text-surface-400 hover:text-surface-100">
+                        <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                        </svg>
+                    </button>
+                </div>
+
+                <form onSubmit={handleUpdate} className="space-y-6">
+                    <div>
+                        <label className="label">Title</label>
+                        <input
+                            type="text"
+                            className="input"
+                            value={title}
+                            onChange={e => setTitle(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="label">Genre</label>
+                        <input
+                            type="text"
+                            className="input"
+                            value={genre}
+                            onChange={e => setGenre(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div>
+                        <label className="label">Premise</label>
+                        <textarea
+                            className="textarea h-32"
+                            value={premise}
+                            onChange={e => setPremise(e.target.value)}
+                            required
+                        />
+                    </div>
+
+                    <div className="flex gap-4 pt-4">
+                        <button type="button" onClick={onClose} className="btn-secondary flex-1">
+                            Cancel
+                        </button>
+                        <button type="submit" disabled={saving} className="btn-primary flex-1">
+                            {saving ? 'Saving...' : 'Save Changes'}
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     )
