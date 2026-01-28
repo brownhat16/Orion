@@ -42,6 +42,28 @@ services:
     name: orion-redis
     plan: free
 
+  # Celery Worker (Background Tasks)
+  - type: worker
+    name: orion-worker
+    runtime: python
+    rootDir: backend
+    buildCommand: pip install -r requirements.txt
+    startCommand: celery -A app.tasks.celery_app worker --loglevel=info
+    envVars:
+      - key: NVIDIA_NIM_ENABLED
+        value: "true"
+      - key: NGC_API_KEY
+        sync: false
+      - key: DATABASE_URL
+        fromDatabase:
+          name: orion-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          name: orion-redis
+          type: redis
+          property: connectionString
+
 databases:
   - name: orion-db
     plan: free
