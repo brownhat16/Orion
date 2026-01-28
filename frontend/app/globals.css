@@ -1,0 +1,282 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Crimson+Text:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ================================
+   BASE STYLES
+   ================================ */
+
+:root {
+  --gradient-primary: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --gradient-accent: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+  --gradient-dark: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+  --glass-bg: rgba(255, 255, 255, 0.05);
+  --glass-border: rgba(255, 255, 255, 0.1);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+body {
+  @apply bg-surface-950 text-surface-100 font-sans antialiased;
+  background-image: 
+    radial-gradient(ellipse at top, rgba(99, 102, 241, 0.1) 0%, transparent 50%),
+    radial-gradient(ellipse at bottom right, rgba(217, 70, 239, 0.05) 0%, transparent 50%);
+  min-height: 100vh;
+}
+
+/* ================================
+   TYPOGRAPHY
+   ================================ */
+
+h1, h2, h3, h4, h5, h6 {
+  @apply font-semibold tracking-tight;
+}
+
+.prose-content {
+  @apply font-serif text-lg leading-relaxed text-surface-200;
+}
+
+.prose-content p {
+  @apply mb-6;
+}
+
+/* ================================
+   GLASSMORPHISM COMPONENTS
+   ================================ */
+
+.glass {
+  @apply backdrop-blur-xl border border-white/10;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.glass-card {
+  @apply glass rounded-2xl p-6 shadow-xl;
+  box-shadow: 
+    0 8px 32px rgba(0, 0, 0, 0.3),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.glass-button {
+  @apply glass px-4 py-2 rounded-lg font-medium transition-all duration-300;
+  @apply hover:bg-white/10 hover:border-white/20;
+  @apply active:scale-95;
+}
+
+/* ================================
+   BUTTONS
+   ================================ */
+
+.btn {
+  @apply px-6 py-3 rounded-xl font-semibold transition-all duration-300;
+  @apply focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-surface-950;
+}
+
+.btn-primary {
+  @apply btn bg-gradient-to-r from-primary-500 to-accent-500 text-white;
+  @apply hover:from-primary-600 hover:to-accent-600;
+  @apply focus:ring-primary-500;
+  box-shadow: 0 4px 15px rgba(14, 165, 233, 0.4);
+}
+
+.btn-primary:hover {
+  box-shadow: 0 6px 20px rgba(14, 165, 233, 0.5);
+  transform: translateY(-2px);
+}
+
+.btn-secondary {
+  @apply btn glass text-surface-100;
+  @apply hover:bg-white/10;
+}
+
+.btn-ghost {
+  @apply btn bg-transparent text-surface-300;
+  @apply hover:bg-white/5 hover:text-surface-100;
+}
+
+/* ================================
+   FORM ELEMENTS
+   ================================ */
+
+.input {
+  @apply w-full px-4 py-3 rounded-xl;
+  @apply bg-surface-900/50 border border-surface-700;
+  @apply text-surface-100 placeholder-surface-500;
+  @apply focus:outline-none focus:ring-2 focus:ring-primary-500/50 focus:border-primary-500;
+  @apply transition-all duration-300;
+}
+
+.input:focus {
+  @apply bg-surface-900;
+}
+
+.textarea {
+  @apply input resize-none;
+}
+
+.label {
+  @apply block text-sm font-medium text-surface-300 mb-2;
+}
+
+/* ================================
+   CARDS & CONTAINERS
+   ================================ */
+
+.card {
+  @apply glass-card;
+  @apply transition-all duration-300;
+}
+
+.card:hover {
+  @apply border-white/20;
+  box-shadow: 
+    0 12px 40px rgba(0, 0, 0, 0.4),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.1);
+  transform: translateY(-2px);
+}
+
+.card-header {
+  @apply flex items-center justify-between mb-4;
+}
+
+.card-title {
+  @apply text-xl font-semibold text-surface-100;
+}
+
+/* ================================
+   STATUS INDICATORS
+   ================================ */
+
+.status-badge {
+  @apply inline-flex items-center px-3 py-1 rounded-full text-xs font-medium;
+}
+
+.status-draft {
+  @apply status-badge bg-surface-700 text-surface-300;
+}
+
+.status-generating {
+  @apply status-badge bg-primary-500/20 text-primary-300;
+  animation: pulse 2s infinite;
+}
+
+.status-completed {
+  @apply status-badge bg-emerald-500/20 text-emerald-300;
+}
+
+.status-failed {
+  @apply status-badge bg-red-500/20 text-red-300;
+}
+
+/* ================================
+   PROGRESS INDICATORS
+   ================================ */
+
+.progress-bar {
+  @apply h-2 rounded-full bg-surface-800 overflow-hidden;
+}
+
+.progress-fill {
+  @apply h-full rounded-full bg-gradient-to-r from-primary-500 to-accent-500;
+  transition: width 0.5s ease-out;
+}
+
+/* ================================
+   ANIMATIONS
+   ================================ */
+
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+.skeleton {
+  @apply bg-surface-800 rounded;
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0.03) 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    rgba(255, 255, 255, 0.03) 100%
+  );
+  background-size: 200% 100%;
+  animation: shimmer 2s infinite;
+}
+
+.animate-in {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+/* ================================
+   TIPTAP EDITOR
+   ================================ */
+
+.tiptap-editor {
+  @apply prose-content min-h-[300px] p-4 rounded-xl;
+  @apply bg-surface-900/50 border border-surface-700;
+  @apply focus-within:ring-2 focus-within:ring-primary-500/50 focus-within:border-primary-500;
+}
+
+.tiptap-editor .ProseMirror {
+  @apply min-h-[280px] outline-none;
+}
+
+.tiptap-editor .ProseMirror p.is-editor-empty:first-child::before {
+  @apply text-surface-500;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+}
+
+/* ================================
+   SIDEBAR NAVIGATION
+   ================================ */
+
+.sidebar-item {
+  @apply flex items-center gap-3 px-4 py-3 rounded-xl;
+  @apply text-surface-400 transition-all duration-200;
+  @apply hover:bg-white/5 hover:text-surface-100;
+}
+
+.sidebar-item.active {
+  @apply bg-primary-500/10 text-primary-400;
+}
+
+/* ================================
+   SCROLLBAR STYLING
+   ================================ */
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-surface-900;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-surface-700 rounded-full;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  @apply bg-surface-600;
+}
