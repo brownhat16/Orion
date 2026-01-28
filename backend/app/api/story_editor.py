@@ -335,8 +335,8 @@ async def create_draft_chapter(
         project_id=project_id,
         order=next_order,
         title=f"Chapter {next_order}",
-        summary="",
-        content="",
+        summary="Draft chapter - add summary",
+        raw_text="",
         status="draft",
         word_count=0,
     )

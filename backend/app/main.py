@@ -33,7 +33,6 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
     debug=settings.debug,
-    redirect_slashes=False,  # Prevent 307 redirects
 )
 
 # CORS configuration - allow all origins for now (or specific ones)
