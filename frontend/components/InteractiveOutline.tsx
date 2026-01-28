@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/context/ToastContext'
 
 interface Chapter {
     id: number
@@ -21,10 +22,10 @@ export default function InteractiveOutline({ projectId, chapters, onUpdate }: In
     const [editingChapter, setEditingChapter] = useState<Chapter | null>(null)
     const [isCreating, setIsCreating] = useState(false)
     const [loading, setLoading] = useState(false)
+    const { success, error, info } = useToast()
 
     async function handleRefine(chapterId: number) {
-        // Placeholder for future AI refinement
-        alert('AI Refinement coming soon!')
+        info('AI Refinement coming soon!')
     }
 
     async function handleDelete(chapterId: number) {
@@ -36,10 +37,14 @@ export default function InteractiveOutline({ projectId, chapters, onUpdate }: In
                 method: 'DELETE',
             })
             if (res.ok) {
+                success('Chapter deleted successfully')
                 onUpdate()
+            } else {
+                error('Failed to delete chapter')
             }
-        } catch (error) {
-            console.error('Failed to delete chapter:', error)
+        } catch (err) {
+            console.error('Failed to delete chapter:', err)
+            error('An error occurred while deleting the chapter')
         } finally {
             setLoading(false)
         }
@@ -147,6 +152,7 @@ function ChapterForm({
     const [title, setTitle] = useState(chapter?.title || '')
     const [summary, setSummary] = useState(chapter?.summary || '')
     const [saving, setSaving] = useState(false)
+    const { success, error } = useToast()
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -173,7 +179,10 @@ function ChapterForm({
             })
 
             if (res.ok) {
+                success(chapter ? 'Chapter updated' : 'Chapter created')
                 onSaved()
+            } else {
+                error('Failed to save chapter')
             }
         } catch (error) {
             console.error('Failed to save chapter:', error)

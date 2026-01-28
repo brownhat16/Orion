@@ -5,6 +5,7 @@ import { useParams, useRouter } from 'next/navigation'
 import StoryEditor from '@/components/StoryEditor'
 import InteractiveOutline from '@/components/InteractiveOutline'
 import CharacterManager from '@/components/CharacterManager'
+import { useToast } from '@/context/ToastContext'
 
 interface Project {
     id: number
@@ -48,6 +49,7 @@ export default function ProjectPage() {
     const [activeTab, setActiveTab] = useState<'overview' | 'outline' | 'characters' | 'manuscript' | 'editor'>('overview')
     const [generating, setGenerating] = useState(false)
     const [showEditModal, setShowEditModal] = useState(false)
+    const { success, error, info } = useToast()
 
     useEffect(() => {
         fetchProject()
@@ -81,8 +83,10 @@ export default function ProjectPage() {
             })
             // Poll for updates
             setTimeout(fetchProject, 5000)
-        } catch (error) {
-            console.error('Failed to start generation:', error)
+            success('Outline generation started')
+        } catch (err) {
+            console.error('Failed to start generation:', err)
+            error('Failed to start outline generation')
         } finally {
             setGenerating(false)
         }
@@ -96,8 +100,10 @@ export default function ProjectPage() {
                 body: JSON.stringify({ approved: true }),
             })
             fetchProject()
-        } catch (error) {
-            console.error('Failed to approve outline:', error)
+            success('Outline approved')
+        } catch (err) {
+            console.error('Failed to approve outline:', err)
+            error('Failed to approve outline')
         }
     }
 
@@ -107,8 +113,10 @@ export default function ProjectPage() {
             await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/generation/${projectId}/generate-chapters`, {
                 method: 'POST',
             })
-        } catch (error) {
-            console.error('Failed to start generation:', error)
+            success('Chapter generation started')
+        } catch (err) {
+            console.error('Failed to start generation:', err)
+            error('Failed to start chapter generation')
         } finally {
             setGenerating(false)
         }

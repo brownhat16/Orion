@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import { useToast } from '@/context/ToastContext'
 
 interface Character {
     id: number
@@ -21,6 +22,7 @@ export default function CharacterManager({ projectId, characters, onUpdate }: Ch
     const [editingCharacter, setEditingCharacter] = useState<Character | null>(null)
     const [isCreating, setIsCreating] = useState(false)
     const [loading, setLoading] = useState(false)
+    const { success, error } = useToast()
 
     async function handleDelete(characterId: number) {
         if (!confirm('Are you sure you want to delete this character?')) return
@@ -31,10 +33,14 @@ export default function CharacterManager({ projectId, characters, onUpdate }: Ch
                 method: 'DELETE',
             })
             if (res.ok) {
+                success('Character deleted')
                 onUpdate()
+            } else {
+                error('Failed to delete character')
             }
-        } catch (error) {
-            console.error('Failed to delete character:', error)
+        } catch (err) {
+            console.error('Failed to delete character:', err)
+            error('Error deleting character')
         } finally {
             setLoading(false)
         }
@@ -164,6 +170,7 @@ function CharacterForm({
     const [appearance, setAppearance] = useState(character?.appearance || '')
     const [personality, setPersonality] = useState(character?.personality || '')
     const [saving, setSaving] = useState(false)
+    const { success, error } = useToast()
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault()
@@ -192,7 +199,10 @@ function CharacterForm({
             })
 
             if (res.ok) {
+                success(character ? 'Character updated' : 'Character added')
                 onSaved()
+            } else {
+                error('Failed to save character')
             }
         } catch (error) {
             console.error('Failed to save character:', error)

@@ -40,8 +40,9 @@ module.exports = {
                     200: '#e4e4e7',
                     300: '#d4d4d8',
                     400: '#a1a1aa',
-                    500: '#71717a',
-                    600: '#52525b',
+                    // Modified 500-600 for better contrast on dark interaction
+                    500: '#84848b', // Lightened from #71717a
+                    600: '#62626b', // Adjusted
                     700: '#3f3f46',
                     800: '#27272a',
                     900: '#18181b',
