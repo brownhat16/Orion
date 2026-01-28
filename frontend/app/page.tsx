@@ -22,7 +22,7 @@ export default function Dashboard() {
 
     async function fetchProjects() {
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`)
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/`)
             if (res.ok) {
                 const data = await res.json()
                 setProjects(data)
@@ -186,7 +186,7 @@ function NewProjectModal({ onClose, onCreated }: { onClose: () => void; onCreate
         setCreating(true)
 
         try {
-            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects`, {
+            const res = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/api/projects/`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ title, premise, genre }),
