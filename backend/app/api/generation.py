@@ -51,10 +51,14 @@ class ChapterGenerateRequest(BaseModel):
 
 # ==================== ROUTES ====================
 
+from fastapi import APIRouter, Depends, HTTPException, status, BackgroundTasks
+from app.services import generation_logic
+
 @router.post("/{project_id}/generate-outline")
 async def generate_outline(
     project_id: int,
     request: GenerateOutlineRequest,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     """
@@ -82,8 +86,7 @@ async def generate_outline(
     project.status = ProjectStatus.OUTLINING.value
     await db.commit()
     
-    # Try async task queue, fall back to returning immediately 
-    # (outline generation will need to be triggered manually or via webhook)
+    # Try async task queue, fallback to background threads (Lite Mode)
     try:
         from app.tasks.celery_app import generate_outline_task
         task = generate_outline_task.delay(
@@ -95,34 +98,34 @@ async def generate_outline(
             "message": "Outline generation started",
             "task_id": task.id,
             "project_id": project_id,
+            "mode": "production (celery)"
         }
-    except Exception as e:
-        # Redis/Celery not available - return placeholder for now
-        # In production, you'd want a proper queue or background thread
-        project.status = "outline_pending"
-        await db.commit()
+    except Exception:
+        # Fallback to local background task
+        background_tasks.add_task(
+            generation_logic.generate_outline_logic,
+            project_id=project_id,
+            num_chapters=request.num_chapters,
+            additional_instructions=request.additional_instructions
+        )
         return {
-            "message": "Outline generation queued (async worker not available - requires Redis)",
+            "message": "Outline generation started (Lite Mode)",
             "task_id": None,
             "project_id": project_id,
-            "note": "Redis/Celery not configured. For full functionality, add a Redis service.",
+            "mode": "lite (background_thread)",
+            "note": "Running in free tier mode without Redis."
         }
 
 
 @router.post("/{project_id}/generate-chapters")
 async def generate_chapters(
     project_id: int,
+    background_tasks: BackgroundTasks,
     request: Optional[ChapterGenerateRequest] = None,
     db: AsyncSession = Depends(get_db),
 ):
     """
     Start chapter generation.
-    
-    This is Phase 2 - writes the actual prose.
-    The project outline must be approved first.
-    
-    If chapter_number is provided, generates only that chapter.
-    Otherwise, generates all remaining chapters.
     """
     project = await db.get(Project, project_id)
     
@@ -153,15 +156,20 @@ async def generate_chapters(
             "message": "Chapter generation started",
             "task_id": task.id,
             "project_id": project_id,
+            "mode": "production (celery)"
         }
     except Exception:
-        project.status = "generation_pending"
-        await db.commit()
+        background_tasks.add_task(
+            generation_logic.generate_chapters_logic,
+            project_id=project_id,
+            start_chapter=request.chapter_number if request else None,
+        )
         return {
-            "message": "Chapter generation queued (async worker not available)",
+            "message": "Chapter generation started (Lite Mode)",
             "task_id": None,
             "project_id": project_id,
-            "note": "Redis/Celery not configured.",
+            "mode": "lite (background_thread)",
+            "note": "Running in free tier mode without Redis."
         }
 
 
@@ -172,8 +180,6 @@ async def pause_generation(
 ):
     """
     Pause ongoing generation.
-    
-    Generation will stop after the current beat is complete.
     """
     project = await db.get(Project, project_id)
     
@@ -192,12 +198,8 @@ async def pause_generation(
     project.status = ProjectStatus.PAUSED.value
     await db.commit()
     
-    # Signal the running task to stop (if Redis available)
-    try:
-        from app.tasks.celery_app import signal_pause
-        signal_pause(project_id)
-    except Exception:
-        pass  # No Redis, task wasn't running async anyway
+    # Signal the running task to stop (works for both modes)
+    generation_logic.signal_pause(project_id)
     
     return {"message": "Pause signal sent", "project_id": project_id}
 
@@ -205,6 +207,7 @@ async def pause_generation(
 @router.post("/{project_id}/resume")
 async def resume_generation(
     project_id: int,
+    background_tasks: BackgroundTasks,
     db: AsyncSession = Depends(get_db),
 ):
     """Resume paused generation."""
@@ -236,12 +239,19 @@ async def resume_generation(
             "message": "Generation resumed",
             "task_id": task.id,
             "project_id": project_id,
+            "mode": "production (celery)"
         }
     except Exception:
+        background_tasks.add_task(
+            generation_logic.generate_chapters_logic,
+            project_id=project_id,
+            start_chapter=project.current_chapter + 1,
+        )
         return {
-            "message": "Resume queued (async worker not available)",
+            "message": "Resume queued (Lite Mode)",
             "task_id": None,
             "project_id": project_id,
+            "mode": "lite (background_thread)"
         }
 
 
