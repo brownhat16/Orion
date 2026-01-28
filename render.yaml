@@ -32,15 +32,13 @@ services:
     startCommand: npm run start
     envVars:
       - key: NEXT_PUBLIC_API_URL
-        fromService:
-          name: orion-backend
-          type: web
-          property: url
+        sync: false # User must set this manually to the backend URL
 
   # Redis
   - type: redis
     name: orion-redis
     plan: free
+    ipAllowList: [] # Internal access only
 
   # Celery Worker (Background Tasks)
   - type: worker
