@@ -32,9 +32,9 @@ class CharacterCreate(BaseModel):
 
 class CharacterUpdate(BaseModel):
     """Schema for updating a character."""
-    name: Optional[str] = None
-    role: Optional[str] = None
-    bio: Optional[str] = None
+    name: Optional[str] = Field(None, min_length=1, max_length=200)
+    role: Optional[str] = Field(None, min_length=1, max_length=100)
+    bio: Optional[str] = Field(None, min_length=10)
     appearance: Optional[str] = None
     personality: Optional[str] = None
     backstory: Optional[str] = None

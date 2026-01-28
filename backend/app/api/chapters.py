@@ -28,8 +28,8 @@ class ChapterCreate(BaseModel):
 
 class ChapterUpdate(BaseModel):
     """Schema for updating a chapter."""
-    title: Optional[str] = None
-    summary: Optional[str] = None
+    title: Optional[str] = Field(None, min_length=1, max_length=500)
+    summary: Optional[str] = Field(None, min_length=10)
     order: Optional[int] = None
     status: Optional[str] = None
 

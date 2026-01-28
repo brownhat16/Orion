@@ -205,6 +205,7 @@ function ChapterForm({
                         className="input"
                         placeholder="e.g. The Call to Adventure"
                         required
+                        maxLength={100}
                     />
                 </div>
                 <div>
@@ -218,6 +219,7 @@ function ChapterForm({
                         rows={3}
                         placeholder="What happens in this chapter?"
                         required
+                        maxLength={500}
                     />
                 </div>
                 <div className="flex justify-end gap-3">

@@ -223,6 +223,7 @@ function CharacterForm({
                         className="input"
                         placeholder="Character Name"
                         required
+                        maxLength={50}
                     />
                 </div>
                 <div>
@@ -234,6 +235,7 @@ function CharacterForm({
                         className="input"
                         placeholder="Protagonist, Antagonist, etc."
                         required
+                        maxLength={50}
                     />
                 </div>
             </div>
@@ -248,6 +250,7 @@ function CharacterForm({
                         rows={3}
                         placeholder="Key background information..."
                         required
+                        maxLength={500}
                     />
                 </div>
 
@@ -260,6 +263,7 @@ function CharacterForm({
                             className="textarea"
                             rows={2}
                             placeholder="Physical description..."
+                            maxLength={200}
                         />
                     </div>
                     <div>
@@ -270,6 +274,7 @@ function CharacterForm({
                             className="textarea"
                             rows={2}
                             placeholder="Traits, quirks, flaws..."
+                            maxLength={200}
                         />
                     </div>
                 </div>
