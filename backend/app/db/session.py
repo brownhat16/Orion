@@ -23,8 +23,14 @@ if settings.database_url.startswith("sqlite"):
         connect_args={"check_same_thread": False},
     )
 else:
+else:
+    # Ensure postgresql:// schema (SQLAlchemy doesn't support postgres:// anymore)
+    db_url = settings.database_url
+    if db_url.startswith("postgres://"):
+        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        
     engine = create_async_engine(
-        settings.database_url,
+        db_url,
         echo=settings.debug,
         pool_pre_ping=True,
         pool_size=5,
