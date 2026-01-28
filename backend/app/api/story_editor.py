@@ -239,7 +239,7 @@ async def save_line(
         )
     
     # Get current content
-    current_content = chapter.content or ""
+    current_content = chapter.raw_text or ""
     lines = current_content.split("\n\n") if current_content else []
     
     # Add or update line
@@ -249,8 +249,8 @@ async def save_line(
         lines.append(request.content)
     
     # Update chapter
-    chapter.content = "\n\n".join(lines)
-    chapter.word_count = len(chapter.content.split())
+    chapter.raw_text = "\n\n".join(lines)
+    chapter.word_count = len(chapter.raw_text.split())
     
     # Update project totals
     result = await db.execute(
@@ -294,7 +294,7 @@ async def get_chapter_content(
             detail="Chapter not found"
         )
     
-    content = chapter.content or ""
+    content = chapter.raw_text or ""
     lines = content.split("\n\n") if content else []
     
     return StoryContent(
