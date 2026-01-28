@@ -208,9 +208,13 @@ async def delete_project(
         )
     
     # Delete from vector DB
-    from app.agents.lorekeeper import LorekeeperAgent
-    lorekeeper = LorekeeperAgent(project_id)
-    await lorekeeper.delete_project_data()
+    try:
+        from app.agents.lorekeeper import LorekeeperAgent
+        lorekeeper = LorekeeperAgent(project_id)
+        await lorekeeper.delete_project_data()
+    except Exception as e:
+        # Log error but continue with DB deletion
+        print(f"Failed to delete vector data for project {project_id}: {e}")
     
     # Delete from database (cascades to related entities)
     await db.delete(project)
