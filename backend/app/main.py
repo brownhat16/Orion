@@ -33,12 +33,19 @@ app = FastAPI(
     version="0.1.0",
     lifespan=lifespan,
     debug=settings.debug,
+    redirect_slashes=False,  # Prevent 307 redirects
 )
 
-# CORS configuration
+# CORS configuration - allow all origins for now (or specific ones)
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000"],
+    allow_origins=[
+        "http://localhost:3000",
+        "http://127.0.0.1:3000",
+        "https://frontend-jzyeb6ril-nick1234s-projects.vercel.app",
+        "https://*.vercel.app",  # Allow all Vercel preview URLs
+    ],
+    allow_origin_regex=r"https://.*\.vercel\.app",  # Regex for Vercel subdomains
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
