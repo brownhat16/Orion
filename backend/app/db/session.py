@@ -30,27 +30,33 @@ else:
     elif db_url.startswith("postgresql://"):
         db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
     
-    # Check for sslmode in the URL and handle it for asyncpg
+    # Check for sslmode and channel_binding in the URL and handle it for asyncpg
     connect_args = {}
-    if "sslmode=" in db_url:
-        # Simple string check first to avoid imports if not needed, 
-        # but for robustness we should probably handle it properly or just strip it.
-        # However, a cleaner way for asyncpg is to pass ssl context or string in connect_args.
-        # Render/Neon usually sends ?sslmode=require
-        
-        # We need to strip sslmode from db_url because SQLAlchemy/asyncpg will try to pass it as kwarg
-        # and asyncpg doesn't accept 'sslmode'
+    
+    # We need to strip sslmode and channel_binding because SQLAlchemy/asyncpg will try to pass them as kwargs
+    # and asyncpg doesn't accept them directly in this context from the URL query params
+    if "?" in db_url:
         from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
         
         parsed = urlparse(db_url)
         qs = parse_qs(parsed.query)
         
+        modified = False
+        
         if "sslmode" in qs:
             ssl_mode = qs.pop("sslmode")[0]
             if ssl_mode == "require":
                 connect_args["ssl"] = "require"
+            modified = True
             
-            # Rebuild URL without sslmode
+        if "channel_binding" in qs:
+            # asyncpg doesn't support channel_binding as a kwarg directly here
+            # We just remove it.
+            qs.pop("channel_binding")
+            modified = True
+
+        if modified:
+            # Rebuild URL without the removed params
             new_query = urlencode(qs, doseq=True)
             parsed = parsed._replace(query=new_query)
             db_url = urlunparse(parsed)
