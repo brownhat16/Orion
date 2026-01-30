@@ -29,13 +29,39 @@ else:
         db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
     elif db_url.startswith("postgresql://"):
         db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
+    
+    # Check for sslmode in the URL and handle it for asyncpg
+    connect_args = {}
+    if "sslmode=" in db_url:
+        # Simple string check first to avoid imports if not needed, 
+        # but for robustness we should probably handle it properly or just strip it.
+        # However, a cleaner way for asyncpg is to pass ssl context or string in connect_args.
+        # Render/Neon usually sends ?sslmode=require
         
+        # We need to strip sslmode from db_url because SQLAlchemy/asyncpg will try to pass it as kwarg
+        # and asyncpg doesn't accept 'sslmode'
+        from urllib.parse import urlparse, parse_qs, urlencode, urlunparse
+        
+        parsed = urlparse(db_url)
+        qs = parse_qs(parsed.query)
+        
+        if "sslmode" in qs:
+            ssl_mode = qs.pop("sslmode")[0]
+            if ssl_mode == "require":
+                connect_args["ssl"] = "require"
+            
+            # Rebuild URL without sslmode
+            new_query = urlencode(qs, doseq=True)
+            parsed = parsed._replace(query=new_query)
+            db_url = urlunparse(parsed)
+
     engine = create_async_engine(
         db_url,
         echo=settings.debug,
         pool_pre_ping=True,
         pool_size=5,
         max_overflow=10,
+        connect_args=connect_args,
     )
 
 # Session factory
