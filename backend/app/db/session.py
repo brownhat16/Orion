@@ -26,7 +26,9 @@ else:
     # Ensure postgresql:// schema (SQLAlchemy doesn't support postgres:// anymore)
     db_url = settings.database_url
     if db_url.startswith("postgres://"):
-        db_url = db_url.replace("postgres://", "postgresql://", 1)
+        db_url = db_url.replace("postgres://", "postgresql+asyncpg://", 1)
+    elif db_url.startswith("postgresql://"):
+        db_url = db_url.replace("postgresql://", "postgresql+asyncpg://", 1)
         
     engine = create_async_engine(
         db_url,
