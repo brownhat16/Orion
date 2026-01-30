@@ -23,7 +23,6 @@ if settings.database_url.startswith("sqlite"):
         connect_args={"check_same_thread": False},
     )
 else:
-else:
     # Ensure postgresql:// schema (SQLAlchemy doesn't support postgres:// anymore)
     db_url = settings.database_url
     if db_url.startswith("postgres://"):
